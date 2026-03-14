@@ -193,7 +193,9 @@ async function start() {
   const { rows } = await pool.query('SELECT COUNT(*) FROM staff_users');
   if (parseInt(rows[0].count) === 0) {
     console.log('No staff users found — running seed...');
-    require('./seed');
+    const seed = require('./seed');
+    await seed({ skipInit: true });
+    console.log('Seed complete.');
   }
 
   app.listen(PORT, () => console.log(`API running on port ${PORT}`));

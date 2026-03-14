@@ -1,8 +1,8 @@
 const bcrypt = require('bcryptjs');
 const { pool, initDB } = require('./db');
 
-async function seed() {
-  await initDB();
+async function seed(options = {}) {
+  if (!options.skipInit) await initDB();
 
   // Seed admin user (change password via ADMIN_PASSWORD env var)
   const password = process.env.ADMIN_PASSWORD || 'bloom2026';
@@ -59,9 +59,14 @@ async function seed() {
     `, [day, isOpen, open, close]);
   }
   console.log('Working hours seeded.');
-
-  await pool.end();
-  console.log('Seed complete.');
 }
 
-seed().catch(err => { console.error(err); process.exit(1); });
+module.exports = seed;
+
+// Run directly with: node seed.js
+if (require.main === module) {
+  seed().then(() => {
+    console.log('Seed complete.');
+    return pool.end();
+  }).catch(err => { console.error(err); process.exit(1); });
+}
